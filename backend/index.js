@@ -15,27 +15,27 @@ dotenv.config();
 const port = process.env.PORT || 8000;
 const app = express();
 
+
+app.post(
+    "/api/credits/webhook",
+    express.raw({ type: "application/json" }),
+    stripeWebhook
+);
+
+
 app.use(express.json());
 app.use(cookieParser());
 
-app.post(
-    "api/credits/webhook",
-    express.raw({type: "application/json"}),
-    stripeWebhook
-)
 app.use(cors({
-    origin: ["https://ai-exam-notes-client.onrender.com"],  
+    origin: ["https://ai-exam-notes-client.onrender.com"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 
-
-
 app.use("/api/auth", authRouter);
-app.use("/api/user", userRouter)
-app.use("/api/notes", notesRouter)
-app.use("/api/pdf", pdfRouter)
-app.use("/api/credit", creditRouter)
+app.use("/api/user", userRouter);
+app.use("/api/notes", notesRouter);
+app.use("/api/pdf", pdfRouter);
+app.use("/api/credit", creditRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
