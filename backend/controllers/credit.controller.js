@@ -53,27 +53,38 @@ export const stripeWebhook = async (req, res) => {
      const sig = req.headers['stripe-signature'];
      let event;
 
+     console.log("Webhook received, signature present:", !!sig);
+
      try {
           event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+          console.log("Webhook event type:", event.type);
      } catch (err) {
           console.log("Webhook signature verification failed.", err.message);
           return res.status(400).send(`Webhook Error: ${err.message}`);
      }
-    
+     
      if (event.type === 'checkout.session.completed') {
           const session = event.data.object;
           const userId = session.metadata.userId;
           const creditsToAdd = Number(session.metadata.credits);
 
-          if(!userId || ! creditsToAdd){
+          console.log("Processing payment completion - UserId:", userId, "Credits:", creditsToAdd);
+
+          if(!userId || !creditsToAdd){
+               console.log("Invalid session metadata - userId:", userId, "credits:", creditsToAdd);
                return res.status(400).json({ message: "Invalid session metadata" })
           }
-          const user= await UserModel.findByIdAndUpdate(userId,{
-               $inc:{credits:creditsToAdd},
-               $set: {isCreditAvailable:true},
-
+          try {
+               const user = await UserModel.findByIdAndUpdate(userId,{
+                    $inc:{credits:creditsToAdd},
+                    $set: {isCreditAvailable:true},
+               },
+               {new:true})
+               console.log("User credits updated:", user?.credits);
+          } catch (dbError) {
+               console.log("Database error updating credits:", dbError.message);
+               return res.status(500).json({ message: "Failed to update credits" })
           }
-          ,{new:true})
 
      }
      res.json({ received: true });

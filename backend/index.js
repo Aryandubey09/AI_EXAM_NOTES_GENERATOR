@@ -17,7 +17,7 @@ const app = express();
 
 
 app.post(
-    "/api/credit/webhook",
+    "/api/credits/webhook",
     express.raw({ type: "application/json" }),
     stripeWebhook
 );
@@ -35,7 +35,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/notes", notesRouter);
 app.use("/api/pdf", pdfRouter);
-app.use("/api/credit", creditRouter);
+app.use("/api/credits", creditRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
