@@ -12,10 +12,18 @@ function Pricing() {
   const[paying, setPaying] = React.useState(false)
   const[payingAmount, setPayingAmount] = React.useState(null)
 
+const CREDIT_MAP = {
+  100: 50,
+  200: 120,
+  500: 300,
+};
+
  const handlePaying = async (amount) => {
   try {
     setPayingAmount(amount);
     setPaying(true);
+
+    sessionStorage.setItem("pendingCredits", CREDIT_MAP[amount]);
 
     const result = await axios.post(
       `${serverUrl}/api/credits/order`,

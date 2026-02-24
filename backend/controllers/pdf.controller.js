@@ -7,9 +7,9 @@ export const pdfDownload = async (req, res) => {
     return res.status(400).json({ message: "Result data is required" });
   }
 
-  const doc = new PDFDocument({ margin: 50 });
+  const doc = new PDFDocument({ margin: 50, size: "A4" });
 
-  res.setHeader("Content-type", "application/pdf");
+  res.setHeader("Content-Type", "application/pdf");
   res.setHeader(
     "Content-Disposition",
     'attachment; filename="ExamNotesAI.pdf"'
@@ -17,70 +17,146 @@ export const pdfDownload = async (req, res) => {
 
   doc.pipe(res);
 
-  doc.fontSize(20).text("ExamNotes AI", { align: "center" });
-  doc.moveDown();
-
-  doc.fontSize(16).text(`Importance : ${result.importance}`);
-  doc.moveDown();
-
-  doc.fontSize(16).text("Sub Topics");
-  doc.moveDown(0.5);
-
-  Object.entries(result.subTopics).forEach(([star, topics]) => {
+  // ---------- Helper Functions ----------
+  const sectionTitle = (title) => {
+    doc.moveDown(1);
+    doc
+      .fontSize(16)
+      .fillColor("#1a237e")
+      .text(title, { underline: true });
     doc.moveDown(0.5);
-    doc.fontSize(13).text(`${star} Topics:`);
+    doc.fillColor("black");
+  };
 
-    if (Array.isArray(topics)) {
-      topics.forEach((t) => {
-        doc.fontSize(12).text(`- ${t}`);
+  const bulletPoint = (text) => {
+    doc
+      .fontSize(12)
+      .text("• " + text, {
+        align: "left",
+        indent: 20,
+        lineGap: 4,
       });
-    }
-  });
+  };
 
-  doc.moveDown();
-  doc.fontSize(16).text("Detailed Notes");
-  doc.moveDown(0.5);
+  // ---------- Header ----------
+  doc
+    .fontSize(22)
+    .fillColor("#0d47a1")
+    .text("ExamNotes AI", { align: "center" });
+
+  doc
+    .fontSize(12)
+    .fillColor("gray")
+    .text("Smart AI Generated Study Notes", { align: "center" });
+
+  doc.moveDown(2);
+  doc.fillColor("black");
+
+  // ---------- Importance ----------
+
+  // ---------- Sub Topics ----------
+  sectionTitle("Sub Topics");
+
+  if (result.subTopics) {
+    Object.entries(result.subTopics).forEach(([star, topics]) => {
+   
+      doc.moveDown(0.3);
+
+      if (Array.isArray(topics)) {
+        topics.forEach((t) => bulletPoint(t));
+      }
+
+      doc.moveDown();
+    });
+  }
+
+  // ---------- Detailed Notes ----------
+  sectionTitle(" Detailed Notes");
 
   if (result.notes) {
-    doc.fontSize(12).text(result.notes.replace(/[#*]/g, ""));
+    doc
+      .fontSize(12)
+      .text(result.notes.replace(/[#*]/g, ""), {
+        align: "justify",
+        lineGap: 4,
+      });
   }
 
-  doc.moveDown();
-  doc.fontSize(16).text("Revision Points");
-  doc.moveDown(0.5);
+  // ---------- Revision Points ----------
+  sectionTitle(" Revision Points");
 
   if (Array.isArray(result.revisionPoints)) {
-    result.revisionPoints.forEach((p) => {
-      doc.fontSize(12).text(`- ${p}`);
-    });
+    result.revisionPoints.forEach((p) => bulletPoint(p));
   }
 
-  doc.moveDown();
-  doc.fontSize(16).text("Important Questions");
-  doc.moveDown(0.5);
+  // ---------- Important Questions ----------
+  // sectionTitle(" Important Questions");
 
-  doc.fontSize(12).text("Short Questions:");
-  if (Array.isArray(result.shortQuestions)) {
-    result.shortQuestions.forEach((q) => {
-      doc.fontSize(12).text(`- ${q}`);
+  // doc.fontSize(13).text("Short Questions:");
+  // doc.moveDown(0.5);
+  // if (Array.isArray(result.shortQuestions)) {
+  //   result.shortQuestions.forEach((q) => bulletPoint(q));
+  // }
+
+  // doc.moveDown(1);
+  // doc.fontSize(13).text("Long Questions:");
+  // doc.moveDown(0.5);
+  // if (Array.isArray(result.longQuestions)) {
+  //   result.longQuestions.forEach((q) => bulletPoint(q));
+  // }
+  // ---------- Important Questions ----------
+
+
+// Short Questions
+if (Array.isArray(result.shortQuestions) && result.shortQuestions.length > 0) {
+  doc.fontSize(14).fillColor("#0d47a1").text("Short Questions");
+  doc.moveDown(0.5);
+  doc.fillColor("black");
+
+  result.shortQuestions.forEach((q, index) => {
+    doc.fontSize(12).text(`${index + 1}. ${q}`, {
+      align: "left",
+      lineGap: 4,
     });
-  }
+    doc.moveDown(0.3);
+  });
 
+  doc.moveDown(1);
+}
+
+// Long Questions
+if (Array.isArray(result.longQuestions) && result.longQuestions.length > 0) {
+  doc.fontSize(14).fillColor("#0d47a1").text("Long Questions");
   doc.moveDown(0.5);
-  doc.fontSize(12).text("Long Questions:");
-  if (Array.isArray(result.longQuestions)) {
-    result.longQuestions.forEach((q) => {
-      doc.fontSize(12).text(`- ${q}`);
+  doc.fillColor("black");
+
+  result.longQuestions.forEach((q, index) => {
+    doc.fontSize(12).text(`${index + 1}. ${q}`, {
+      align: "left",
+      lineGap: 6,
     });
-  }
+    doc.moveDown(0.5);
+  });
 
-  doc.moveDown(0.5);
-  doc.fontSize(16).text("Diagram Questions");
-  doc.moveDown(0.5);
+  doc.moveDown(1);
+}
+
+  // ---------- Diagram ----------
+  sectionTitle(" Diagram Questions");
 
   if (result?.questions?.diagram) {
-    doc.fontSize(12).text(result.questions.diagram);
+    doc.fontSize(12).text(result.questions.diagram, {
+      align: "left",
+      lineGap: 4,
+    });
   }
+
+  // ---------- Footer ----------
+  doc.moveDown(3);
+  doc
+    .fontSize(10)
+    .fillColor("gray")
+    .text("Generated by ExamNotes AI", { align: "center" });
 
   doc.end();
 };

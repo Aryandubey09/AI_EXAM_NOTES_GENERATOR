@@ -4,6 +4,8 @@ import { FaCheck } from "react-icons/fa";
 import { useDispatch } from 'react-redux';
 import { getCurrentUser } from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { serverUrl } from '../App';
 
 function PaymentSuccess() {
    
@@ -12,7 +14,24 @@ function PaymentSuccess() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getCurrentUser(dispatch);
+    const addCredits = async () => {
+      const credits = sessionStorage.getItem("pendingCredits");
+      if (credits) {
+        try {
+          await axios.post(
+            `${serverUrl}/api/credits/add-credits`,
+            { credits: parseInt(credits) },
+            { withCredentials: true }
+          );
+          sessionStorage.removeItem("pendingCredits");
+        } catch (error) {
+          console.log("Failed to add credits:", error);
+        }
+      }
+      getCurrentUser(dispatch);
+    };
+
+    addCredits();
 
     const t = setTimeout(() => {
       navigate("/");

@@ -68,21 +68,43 @@ function Navbar() {
 
 
           </motion.div>
-          {
-            showCredits && 
-            <AnimatePresence>
-              <motion.div 
-              initial={{ opacity: 0, y: -10 , scale:0.95}}
-              animate={{ opacity: 1, y: 0,scale:1 }}
-              exit={{ opacity: 0, y: -10,scale:0.95 }}
-              transition={{ duration: 0.3 }}
-              className='absolute right-[-50px] mt-4 w-64 rounded-2xl bg-black/90 backdrop-blur-xl border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.77)] p-4 text-white'
-              >
-                <h4 className='font-semibold mb-2'>Buy Credit</h4>
-                <p  className='text-sm text-gray-300 mb-4' >use credits to generate AI notes,diagrams,PDFs</p>
-                <button onClick={()=>{setShowCredits(false); navigate("/pricing")}} className='w-full py-2 rounded-lg bg-gradient-to-br from white to-gray-200 text-black font-semibold hover:opacity-90' >Buy more credits</button>
-              </motion.div>
-            </AnimatePresence>} 
+          
+           {showCredits && (
+  <AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+      transition={{ duration: 0.25 }}
+      className="absolute right-0 mt-4 w-72 rounded-2xl 
+                 bg-black text-gray-800
+                 shadow-2xl border border-gray-200
+                 p-5 z-50"
+    >
+      <h4 className="font-semibold text-lg mb-2 text-white">
+        Buy Credits
+      </h4>
+
+      <p className="text-sm text-white mb-4 leading-relaxed">
+        Use credits to generate AI notes, diagrams and PDFs instantly.
+      </p>
+
+      <button
+        onClick={() => {
+          setShowCredits(false);
+          navigate("/pricing");
+        }}
+        className="w-full py-2.5 rounded-xl 
+                   bg-gradient-to-r from-indigo-600 to-blue-600 
+                   text-white font-semibold 
+                   hover:opacity-90 transition-all duration-200"
+      >
+        Buy More Credits
+      </button>
+    </motion.div>
+  </AnimatePresence>
+)}
+          
              </div>
                   
 <div className='relative'>

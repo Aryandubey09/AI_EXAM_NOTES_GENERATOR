@@ -87,6 +87,28 @@ export const stripeWebhook = async (req, res) => {
           }
 
      }
-     res.json({ received: true });
+      res.json({ received: true });
 
+}
+
+export const addCredits = async (req, res) => {
+     try {
+          const userId = req.userId;
+          const { credits } = req.body;
+
+          if (!credits || credits <= 0) {
+               return res.status(400).json({ message: "Invalid credits amount" });
+          }
+
+          const user = await UserModel.findByIdAndUpdate(userId, {
+               $inc: { credits: credits },
+               $set: { isCreditAvailable: true },
+          }, { new: true });
+
+          console.log("Credits added via API:", user?.credits);
+          res.status(200).json({ message: "Credits added successfully", credits: user?.credits });
+     } catch (error) {
+          console.log("addCredits error:", error.message);
+          res.status(500).json({ message: "Failed to add credits" });
+     }
 }
